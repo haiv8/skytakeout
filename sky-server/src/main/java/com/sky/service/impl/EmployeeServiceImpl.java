@@ -1,17 +1,27 @@
 package com.sky.service.impl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
+import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
+import com.sky.context.BaseContext;
+import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
+import com.sky.dto.EmployeePageQueryDTO;
 import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
 import com.sky.exception.PasswordErrorException;
 import com.sky.mapper.EmployeeMapper;
+import com.sky.result.PageResult;
 import com.sky.service.EmployeeService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+
+import java.time.LocalDateTime;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -38,6 +48,8 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
         }
 
+        password = DigestUtils.md5DigestAsHex(password.getBytes());//把密码通过md5加密
+
         //密码比对
         // TODO 后期需要进行md5加密，然后再进行比对
         if (!password.equals(employee.getPassword())) {
@@ -52,6 +64,58 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         //3、返回实体对象
         return employee;
+    }
+
+    @Override
+    public void addEmp(EmployeeDTO dto) {
+        Employee employee =new Employee();
+        //属性拷贝
+        BeanUtils.copyProperties(dto,employee);
+        //1.补充缺失的属性值
+
+        employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()));
+        employee.setStatus(StatusConstant.ENABLE);
+        employee.setCreateTime(LocalDateTime.now());
+        employee.setUpdateTime(LocalDateTime.now());
+        employee.setCreateUser(BaseContext.getCurrentId());
+        employee.setUpdateUser(BaseContext.getCurrentId());
+        //2.调用mapper的新增方法，将员工对象存入employee表中
+        employeeMapper.insert(employee);
+    }
+
+    @Override
+    public PageResult page(EmployeePageQueryDTO dto) {
+        //1,设置分页参数
+        PageHelper.startPage(dto.getPage(),dto.getPageSize());
+        //2.调用mapper
+        Page<Employee> page = employeeMapper.list(dto.getName());
+        return new PageResult(page.getTotal(),page.getResult());
+    }
+
+    @Override
+    public void enableOrDisable(Integer status, long id) {
+
+        Employee employee = Employee.builder()
+                .id(id).status(status)
+                .updateTime(LocalDateTime.now())
+                .updateUser(BaseContext.getCurrentId())
+                .build();
+        employeeMapper.update(employee);
+    }
+
+    @Override
+    public Employee getById(Long id) {
+
+        return employeeMapper.getById(id);
+    }
+
+    @Override
+    public void update(EmployeeDTO dto) {
+        Employee employee = new Employee();
+        BeanUtils.copyProperties(dto,employee);
+        employee.setUpdateTime(LocalDateTime.now());
+        employee.setUpdateUser(BaseContext.getCurrentId());
+        employeeMapper.update(employee);
     }
 
 }
