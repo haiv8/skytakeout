@@ -84,6 +84,7 @@ public class DishServiceImpl implements DishService {
         //3.删除菜品基本信息dish表
         dishMapper.deleteBatch(ids);
         //4.删除菜品口味表信息，dish_flavor
+
         dishFLavorMapper.deleteBatch(ids);
     }
 }
