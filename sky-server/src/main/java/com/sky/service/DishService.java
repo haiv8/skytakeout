@@ -5,6 +5,8 @@ import com.sky.dto.DishPageQueryDTO;
 import com.sky.result.PageResult;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 public interface DishService {
 
@@ -15,4 +17,6 @@ public interface DishService {
     void addDish(DishDTO dto);
 
     PageResult page(DishPageQueryDTO dto);
+
+    void delete(List<Long> ids);
 }
