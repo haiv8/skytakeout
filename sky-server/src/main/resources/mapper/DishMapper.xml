@@ -58,4 +58,16 @@
     <select id="selectById" resultType="com.sky.entity.Dish">
         select * from dish where id = #{id}
     </select>
+    <select id="listBy" resultType="com.sky.entity.Dish">
+        select * from dish
+        <where>
+        <if test="categoryId != null">
+           category_id = #{categoryId}
+        </if>
+        <if test="status != null">
+            and status = #{status}
+        </if>
+
+      </where>
+    </select>
 </mapper>
