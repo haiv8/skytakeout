@@ -11,9 +11,11 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @RequestMapping("/admin/dish")
@@ -22,6 +24,7 @@ import java.util.List;
 public class DishController {
     @Autowired
     private DishService dishService;
+    private RedisTemplate redisTemplate;
 
     /**
      * 新增菜品
@@ -32,6 +35,7 @@ public class DishController {
     public Result addDish(@RequestBody  DishDTO dto){
         log.info("新增菜品:{}",dto);
         dishService.addDish(dto);
+        redisTemplate.delete("dish_"+ dto.getCategoryId());
         return Result.success();
     }
 
@@ -53,6 +57,8 @@ public class DishController {
     public Result delete(@RequestParam List<Long> ids){
         log.info("删除菜品：{}",ids);
         dishService.delete(ids);
+        Set keys = redisTemplate.keys("*dish_*");
+        redisTemplate.delete(keys);
         return  Result.success();
     }
 
@@ -79,6 +85,8 @@ public class DishController {
     public Result update(@RequestBody DishDTO dto){
         log.info("修改菜品:{}",dto);
         dishService.update(dto);
+        Set keys = redisTemplate.keys("*dish_*");
+        redisTemplate.delete(keys);
         return  Result.success();
     }
 }
