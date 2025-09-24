@@ -6,8 +6,10 @@ import com.sky.entity.Setmeal;
 import com.sky.result.PageResult;
 import com.sky.vo.DishItemVO;
 import com.sky.vo.SetmealVO;
-import java.util.List;
+import org.springframework.stereotype.Service;
 
+import java.util.List;
+@Service
 public interface SetmealService {
 
     /**
@@ -24,4 +26,13 @@ public interface SetmealService {
      */
     List<DishItemVO> getDishItemById(Long id);
 
+    void saveWithDish(SetmealDTO dto);
+
+    PageResult pageQuery(SetmealPageQueryDTO queryDTO);
+
+    SetmealVO getByIdWithDish(Long id);
+
+    void updateWithDish(SetmealDTO dto);
+
+    void deleteById(Long id);
 }

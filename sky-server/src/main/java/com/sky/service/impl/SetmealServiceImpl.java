@@ -57,4 +57,38 @@ public class SetmealServiceImpl implements SetmealService {
     public List<DishItemVO> getDishItemById(Long id) {
         return setmealMapper.getDishItemBySetmealId(id);
     }
+
+    @Override
+    public void saveWithDish(SetmealDTO dto) {
+        Setmeal setmeal = new Setmeal();
+        BeanUtils.copyProperties(dto, setmeal);
+        setmealMapper.insert(setmeal);
+        // 如果有套餐和菜品关联表，也要保存
+    }
+
+    @Override
+    public PageResult pageQuery(SetmealPageQueryDTO queryDTO) {
+        PageHelper.startPage(queryDTO.getPage(), queryDTO.getPageSize());
+        Page<SetmealVO> page = setmealMapper.pageQuery(queryDTO);
+        return new PageResult(page.getTotal(), page.getResult());
+    }
+
+    @Override
+    public SetmealVO getByIdWithDish(Long id) {
+        return setmealMapper.getById(id);
+    }
+
+    @Override
+    public void updateWithDish(SetmealDTO dto) {
+        Setmeal setmeal = new Setmeal();
+        BeanUtils.copyProperties(dto, setmeal);
+        setmealMapper.update(setmeal);
+        // 先删除原有关联，再插入新关联
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        setmealMapper.delete(id);
+        // 同时删除套餐-菜品关系表数据
+    }
 }

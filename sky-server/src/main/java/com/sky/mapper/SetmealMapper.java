@@ -1,7 +1,12 @@
 package com.sky.mapper;
 
+import com.github.pagehelper.Page;
+import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.entity.Setmeal;
 import com.sky.vo.DishItemVO;
+import com.sky.vo.SetmealVO;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -35,4 +40,17 @@ public interface SetmealMapper {
             "where sd.setmeal_id = #{setmealId}")
     List<DishItemVO> getDishItemBySetmealId(Long setmealId);
 
+    @Insert("insert into setmeal (name, category_id, price, status, create_time) " +
+            "values (#{name}, #{categoryId}, #{price}, #{status}, now())")
+    void insert(Setmeal setmeal);
+
+    Page<SetmealVO> pageQuery(SetmealPageQueryDTO queryDTO);
+
+    @Select("select * from setmeal where id = #{id}")
+    SetmealVO getById(Long id);
+
+    void update(Setmeal setmeal);
+
+    @Delete("delete from setmeal where id = #{id}")
+    void delete(Long id);
 }
