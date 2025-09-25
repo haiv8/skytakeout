@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sky.mapper.AddressBookMapper">
+
+    <!-- 字段映射：DB 下划线 -> Java 驼峰 -->
+    <resultMap id="AddressBookMap" type="com.sky.entity.AddressBook">
+        <id     property="id"            column="id"/>
+        <result property="userId"        column="user_id"/>
+        <result property="consignee"     column="consignee"/>
+        <result property="sex"           column="sex"/>
+        <result property="phone"         column="phone"/>
+        <result property="provinceCode"  column="province_code"/>
+        <result property="provinceName"  column="province_name"/>
+        <result property="cityCode"      column="city_code"/>
+        <result property="cityName"      column="city_name"/>
+        <result property="districtCode"  column="district_code"/>
+        <result property="districtName"  column="district_name"/>
+        <result property="detail"        column="detail"/>
+        <result property="label"         column="label"/>
+        <result property="isDefault"     column="is_default"/>
+    </resultMap>
+
+    <!-- 可复用的列清单 -->
+    <sql id="Base_Column_List">
+         id, user_id, consignee, sex, phone,
+        province_code, province_name,
+        city_code, city_name,
+        district_code, district_name,
+        detail, label, is_default
+    </sql>
+
+    <!-- ============ 查询 ============ -->
+
+    <!-- 条件列表查询 -->
+    <select id="list" parameterType="com.sky.entity.AddressBook" resultMap="AddressBookMap">
+        select <include refid="Base_Column_List"/>
+        from address_book
+        <where>
+            <if test="userId != null">        and user_id = #{userId}         </if>
+            <if test="phone != null and phone != ''"> and phone = #{phone}     </if>
+            <if test="isDefault != null">     and is_default = #{isDefault}    </if>
+            <if test="consignee != null and consignee != ''">
+                and consignee like concat('%', #{consignee}, '%')
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <!-- 主键查询 -->
+    <select id="getById" parameterType="long" resultMap="AddressBookMap">
+        select <include refid="Base_Column_List"/>
+        from address_book
+        where id = #{id}
+    </select>
+
+    <!-- ============ 新增 ============ -->
+    <insert id="insert" parameterType="com.sky.entity.AddressBook" useGeneratedKeys="true" keyProperty="id">
+        insert into address_book
+        (user_id, consignee, sex, phone,
+         province_code, province_name,
+         city_code, city_name,
+         district_code, district_name,
+         detail, label, is_default)
+        values
+            (#{userId}, #{consignee}, #{sex}, #{phone},
+             #{provinceCode}, #{provinceName},
+             #{cityCode}, #{cityName},
+             #{districtCode}, #{districtName},
+             #{detail}, #{label}, #{isDefault})
+    </insert>
+
+    <!-- ============ 更新（动态） ============ -->
+    <update id="update" parameterType="com.sky.entity.AddressBook">
+        update address_book
+        <set>
+            <if test="userId != null">        user_id = #{userId},            </if>
+            <if test="consignee != null">     consignee = #{consignee},       </if>
+            <if test="sex != null">           sex = #{sex},                   </if>
+            <if test="phone != null">         phone = #{phone},               </if>
+            <if test="provinceCode != null">  province_code = #{provinceCode},</if>
+            <if test="provinceName != null">  province_name = #{provinceName},</if>
+            <if test="cityCode != null">      city_code = #{cityCode},        </if>
+            <if test="cityName != null">      city_name = #{cityName},        </if>
+            <if test="districtCode != null">  district_code = #{districtCode},</if>
+            <if test="districtName != null">  district_name = #{districtName},</if>
+            <if test="detail != null">        detail = #{detail},             </if>
+            <if test="label != null">         label = #{label},               </if>
+            <if test="isDefault != null">     is_default = #{isDefault},      </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!-- ============ 删除 ============ -->
+    <delete id="deleteById" parameterType="long">
+        delete from address_book where id = #{id}
+    </delete>
+
+    <!-- ============ 默认地址相关 ============ -->
+    <!-- 先把某用户的全部设为非默认 -->
+    <update id="clearDefault">
+        update address_book
+        set is_default = 0
+        where user_id = #{userId}
+    </update>
+
+    <!-- 再把目标地址设为默认 -->
+    <update id="setDefault">
+        update address_book
+        set is_default = 1
+        where id = #{id}
+    </update>
+
+</mapper>
